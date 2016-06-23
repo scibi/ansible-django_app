@@ -1,0 +1,11 @@
+#!/bin/bash
+
+tmpfile=`mktemp`
+
+for f in {{ django_app_root_path }}/conf.d/*.conf; do
+	sed -e 's,#.*,,' $f | grep -v '^$' | sed -e 's,^,export ,' >> $tmpfile
+done
+
+. $tmpfile
+rm -f $tmpfile
+

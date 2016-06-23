@@ -1,0 +1,120 @@
+---
+# Default variables
+# =================
+
+# .. contents:: Sections
+#    :local:
+#
+
+django_app_name: False
+django_app_version: 'master'        
+django_app_user: '{{ django_app_name }}'
+django_app_group: '{{ django_app_user }}'
+
+django_app_django_subdir: False
+
+django_app_root_path: '{{ ansible_local.root.app + "/djangoapps/" + django_app_name }}'
+django_app_app_path: '{{ django_app_root_path + "/app" }}'
+django_app_venv_path: '{{ django_app_root_path + "/venv" }}'
+django_app_src_path: '{{ django_app_root_path + "/src" }}'
+django_app_log_path: '{{ django_app_root_path + "/log" }}'
+django_app_run_path: '{{ django_app_root_path + "/run" }}'
+django_app_static_path: '{{ django_app_root_path + "/static" }}'
+django_app_django_path: '{{ django_app_app_path }}{% if django_app_django_subdir != False %}/{{ django_app_django_subdir }}{% endif %}'
+        
+django_app_secret_key: "{{ lookup('password', secret + '/credentials/' + ansible_fqdn + '/django_app/' + django_app_name + '/secret length=48') }}"
+django_app_environment:
+  DJANGO_CONFIGURATION: 'Production'
+  DJANGO_STATIC_ROOT: '{{ django_app_static_path }}'
+django_app_environment_venv:
+  VIRTUAL_ENV: '{{ django_app_venv_path }}'
+  PATH: '{{ django_app_venv_path }}/bin:$PATH'
+
+django_app_admin_users:
+  admin: 'admin@{{ ansible_fqdn }}'
+
+django_app_packages_base:
+  - 'virtualenv'
+  - 'python-pip'
+  - 'build-essential'
+  - 'python-dev'
+django_app_packages: []
+django_app_packages_postgresql:
+  True: 
+    - 'libpq-dev'
+  False: []
+django_app_packages_npm:
+  True: 
+    - 'nodejs'
+    - 'npm'
+  False: []
+django_app_enable_postgresql: True
+django_app_enable_gettext: True
+django_app_packages_gettext:
+  True: 
+    - 'gettext'
+  False: []
+
+django_app_nginx_upstreams:        
+  - enabled: True
+    name: 'django_app-{{ django_app_name }}'
+    server: 'unix:{{ django_app_run_path }}/gunicorn.sock fail_timeout=0'
+
+# fail_timeout=0 means we always retry an upstream even if it failed
+# to return a good HTTP response (in case the Unicorn master nukes a
+# single worker for timing out).
+django_app_domains: [ '{{ ansible_fqdn }}' ]
+django_app_nginix_proxy_options: |
+  proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+  proxy_set_header X-Forwarded-Proto https;
+  proxy_set_header Host $http_host;
+  proxy_redirect off;
+  if (!-f $request_filename) {
+    proxy_pass http://django_app-{{ django_app_name }};
+    break;
+  }
+django_app_nginx_location_list_base:
+  - pattern: '/'
+    options: '{{ django_app_nginix_proxy_options }}'
+  - pattern: '/static/'
+    options: |
+      alias   {{ django_app_static_path }}/;
+django_app_nginx_location_list_additional: []
+django_app_nginx_location_list: '{{ django_app_nginx_location_list_base + django_app_nginx_location_list_additional }}'
+
+django_app_nginx_server:
+  by_role: 'debops.django_app'
+  enabled: True
+  name: '{{ django_app_domains }}'
+
+  location_list: '{{ django_app_nginx_location_list }}'
+django_app_grunt_tasks: False
+
+django_app_dependencies: True
+
+# Possible values:
+# - mysql
+# - postgresql
+# - sqlite3        
+django_app_database: 'postgresql'
+django_app_database_name: '{{ django_app_name }}'
+django_app_database_user: '{{ django_app_name }}'
+django_app_database_server: "{{ ansible_local[django_app_database].server }}"
+django_app_database_port: "{{ ansible_local[django_app_database].port }}"
+# .. envvar:: django_app_database_password_path
+#
+# Path to database password file.
+django_app_database_password_path: "{{ secret + '/' + django_app_database + '/' +
+                                    ansible_local[django_app_database].delegate_to }}{%
+                                      if django_app_database=='postgresql' %}/{{ ansible_local[django_app_database].port }}{% endif
+                                    %}{{ '/credentials/' + django_app_database_user +
+                                    '/password' }}"
+
+# .. envvar:: django_app_database_password
+#
+# Database password for the app.
+django_app_database_password: "{{ lookup('password', django_app_database_password_path + ' length=48') }}"
+
+django_app_requirements_path: 'requirements.txt'
+django_app_wsgi_module: 'wsgi'
+

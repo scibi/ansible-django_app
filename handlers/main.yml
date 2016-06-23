@@ -1,0 +1,9 @@
+---
+
+- name: Reload systemd
+  command: systemctl daemon-reload
+
+- name: Restart gunicorn service
+  service:
+    name: 'gunicorn@{{ django_app_name }}'
+    state: 'restarted'
