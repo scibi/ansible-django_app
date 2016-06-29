@@ -1,8 +1,8 @@
 # {{ ansible_managed }}
 
-# based on django_app_environment_venv:
+# based on django_app__environment_venv:
 
-{% for key, value in django_app_environment_venv.iteritems() %}
+{% for key, value in django_app__environment_venv.iteritems() %}
 {{ key }}={{ value }}
 {% endfor %}
 

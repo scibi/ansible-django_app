@@ -1,5 +1,5 @@
 # {{ ansible_managed }}
 
-{% if django_app_database == 'postgresql' %}
-DATABASE_URL=postgres://{{ django_app_database_user }}:{{ django_app_database_password }}@{{ django_app_database_server }}:{{ django_app_database_port }}/{{ django_app_database_name }}
+{% if django_app__database == 'postgresql' %}
+DATABASE_URL=postgres://{{ django_app__database_user }}:{{ django_app__database_password }}@{{ django_app__database_server }}:{{ django_app__database_port }}/{{ django_app__database_name }}
 {% endif %}

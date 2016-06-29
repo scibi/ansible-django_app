@@ -5,5 +5,5 @@
 
 - name: Restart gunicorn service
   service:
-    name: 'gunicorn@{{ django_app_name }}'
+    name: 'gunicorn@{{ django_app__name }}'
     state: 'restarted'

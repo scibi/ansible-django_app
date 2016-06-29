@@ -5,34 +5,34 @@ dependencies:
 
   - role: debops.git_checkout
     tags: [ 'depend::git_checkout', 'depend::git_checkout:django_app', 'depend-of::django_app', 'type::dependency' ]
-    git_checkout__name: '{{ django_app_name }}'
-    git_checkout__app_path: '{{ django_app_app_path }}'
-    git_checkout__app_home_path: '{{ django_app_root_path }}'
-    git_checkout__src_path: '{{ django_app_src_path }}'
-    git_checkout__version: '{{ django_app_version }}'
-    git_checkout__user: '{{ django_app_user }}'
-    git_checkout__group: '{{ django_app_group }}'
+    git_checkout__name: '{{ django_app__name }}'
+    git_checkout__app_path: '{{ django_app__app_path }}'
+    git_checkout__app_home_path: '{{ django_app__root_path }}'
+    git_checkout__src_path: '{{ django_app__src_path }}'
+    git_checkout__version: '{{ django_app__version }}'
+    git_checkout__user: '{{ django_app__user }}'
+    git_checkout__group: '{{ django_app__group }}'
 
   - role: debops.nginx
     tags: [ 'depend::nginx', 'depend::nginx:django_app', 'depend-of::django_app', 'type::dependency' ]
-    nginx_servers: [ '{{ django_app_nginx_server }}' ]
-    nginx_upstreams: '{{ django_app_nginx_upstreams }}'
+    nginx_servers: [ '{{ django_app__nginx_server }}' ]
+    nginx_upstreams: '{{ django_app__nginx_upstreams }}'
 
   - role: debops.postgresql
     postgresql_roles:
-      - name: '{{ django_app_database_name }}' # Separate role is needed when owncloud_database_name != owncloud_database_user
-      - name: '{{ django_app_database_user }}' # Password is not passed directly - it will be read for the file
+      - name: '{{ django_app__database_name }}' # Separate role is needed when owncloud_database_name != owncloud_database_user
+      - name: '{{ django_app__database_user }}' # Password is not passed directly - it will be read for the file
     postgresql_groups:
-      - roles: [ '{{ django_app_database_user }}' ]
-        groups: [ '{{ django_app_database_name }}' ]
-        database: '{{ django_app_database_name }}'
-        enabled: '{{ django_app_database_name != django_app_database_user }}'
+      - roles: [ '{{ django_app__database_user }}' ]
+        groups: [ '{{ django_app__database_name }}' ]
+        database: '{{ django_app__database_name }}'
+        enabled: '{{ django_app__database_name != django_app__database_user }}'
     postgresql_databases:
-      - name: '{{ django_app_database_name }}'
-        owner: '{{ django_app_database_user }}'
+      - name: '{{ django_app__database_name }}'
+        owner: '{{ django_app__database_user }}'
     tags: [ 'depend::postgresql', 'depend::postgresql:django_app', 'depend-of::django_app', 'type::dependency' ]
-    when: (django_app_dependencies is defined and django_app_dependencies) and
-          (django_app_database is defined and django_app_database and django_app_database == 'postgresql')
+    when: (django_app__dependencies is defined and django_app__dependencies) and
+          (django_app__database is defined and django_app__database and django_app__database == 'postgresql')
 
 galaxy_info:
   author: 'Patryk Ściborek'

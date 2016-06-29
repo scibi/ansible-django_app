@@ -1,16 +1,16 @@
 # {{ ansible_managed }}
 
 [Service]
-PIDFile={{ django_app_run_path }}/gunicorn.pid
-User={{ django_app_user }}
-Group={{ django_app_group }}
-WorkingDirectory={{ django_app_django_path }}
-EnvironmentFile={{ django_app_root_path }}/conf.d/*.conf
-ExecStart={{ django_app_venv_path }}/bin/gunicorn {{ django_app_wsgi_module }}:application	\
+PIDFile={{ django_app__run_path }}/gunicorn.pid
+User={{ django_app__user }}
+Group={{ django_app__group }}
+WorkingDirectory={{ django_app__django_path }}
+EnvironmentFile={{ django_app__root_path }}/conf.d/*.conf
+ExecStart={{ django_app__venv_path }}/bin/gunicorn {{ django_app__wsgi_module }}:application	\
 	--name %i 						\
-	--pid {{ django_app_run_path }}/gunicorn.pid		\
+	--pid {{ django_app__run_path }}/gunicorn.pid		\
 	--workers 3 						\
-	--bind=unix:{{ django_app_run_path }}/gunicorn.sock 	\
+	--bind=unix:{{ django_app__run_path }}/gunicorn.sock 	\
 	--log-level=info					\
 	--log-file=-
 

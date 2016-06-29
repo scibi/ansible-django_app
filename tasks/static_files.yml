@@ -4,39 +4,39 @@
 
 - name: Install node packages
   npm:
-    path: '{{ django_app_app_path }}'
-  when: django_app_grunt_tasks != False
-  sudo_user: '{{ django_app_user }}'
+    path: '{{ django_app__app_path }}'
+  when: django_app__grunt_tasks != False
+  sudo_user: '{{ django_app__user }}'
 
 - name: Install grunt-cli
   npm:
     name: 'grunt-cli'
-    path: '{{ django_app_app_path }}'
-  when: django_app_grunt_tasks != False
-  sudo_user: '{{ django_app_user }}'
+    path: '{{ django_app__app_path }}'
+  when: django_app__grunt_tasks != False
+  sudo_user: '{{ django_app__user }}'
 
 - name: Run grunt tasks
   command: 'nodejs node_modules/.bin/grunt {{ item }}'
   args:
-    chdir: '{{ django_app_app_path }}'
-  with_items: '{{ django_app_grunt_tasks }}'
-  when: django_app_grunt_tasks != False
-  sudo_user: '{{ django_app_user }}'
-  register: django_app_register_grunt_tasks
+    chdir: '{{ django_app__app_path }}'
+  with_items: '{{ django_app__grunt_tasks }}'
+  when: django_app__grunt_tasks != False
+  sudo_user: '{{ django_app__user }}'
+  register: django_app__register_grunt_tasks
   tags: [ 'role::django_app:collect_static' ]
 
 # Collecting static files
 
 - name: Collect static
-  shell: '. {{ django_app_root_path }}/bin/setup_django_env.sh; python -m {{ django_app__manage_module }} collectstatic --noinput --link'
+  shell: '. {{ django_app__root_path }}/bin/setup_django_env.sh; python -m {{ django_app__manage_module }} collectstatic --noinput --link'
   args:
-    chdir: '{{ django_app_django_path }}'
-  sudo_user: '{{ django_app_user }}'
-  register: django_app_register_collectstatic
-  changed_when: not django_app_register_collectstatic.stdout_lines[-1]|match("^0 static files symlinked.*")|bool
+    chdir: '{{ django_app__django_path }}'
+  sudo_user: '{{ django_app__user }}'
+  register: django_app__register_collectstatic
+  changed_when: not django_app__register_collectstatic.stdout_lines[-1]|match("^0 static files symlinked.*")|bool
   tags: [ 'role::django_app:collect_static' ]
 
 - debug:
-#    msg: '{{ django_app_register_grunt_tasks }}'        
-    msg: '{{ django_app_register_collectstatic.stdout_lines[-1] }}'        
+#    msg: '{{ django_app__register_grunt_tasks }}'        
+    msg: '{{ django_app__register_collectstatic.stdout_lines[-1] }}'        
   tags: [ 'role::django_app:collect_static' ]

@@ -7,7 +7,7 @@
 
 - name: 'Change shell to /bin/bash'
   user:
-    name: '{{ django_app_user }}'
+    name: '{{ django_app__user }}'
     shell: '/bin/bash'
 
 - name: Install required packages
@@ -16,46 +16,46 @@
     state: 'present'
     install_recommends: False
   with_flattened:
-    - '{{ django_app_packages_base }}'
-    - '{{ django_app_packages }}'
-    - '{{ django_app_packages_postgresql[django_app_enable_postgresql] }}'
-    - '{{ django_app_packages_npm[django_app_grunt_tasks != False] }}'
-    - '{{ django_app_packages_gettext[django_app_enable_gettext] }}'
-    - '{{ django_app_packages_python27[ django_app__python == "python2.7"] }}'
+    - '{{ django_app__packages_base }}'
+    - '{{ django_app__packages }}'
+    - '{{ django_app__packages_postgresql[django_app__enable_postgresql] }}'
+    - '{{ django_app__packages_npm[django_app__grunt_tasks != False] }}'
+    - '{{ django_app__packages_gettext[django_app__enable_gettext] }}'
+    - '{{ django_app__packages_python27[ django_app__python == "python2.7"] }}'
   tags: [ 'role::django_app:base_install' ]
 
 - name: Install Python packages
   pip:
-    requirements: '{{ django_app_app_path }}/{{ item }}'
-    virtualenv: '{{ django_app_venv_path }}'
+    requirements: '{{ django_app__app_path }}/{{ item }}'
+    virtualenv: '{{ django_app__venv_path }}'
     virtualenv_python: '{{ django_app__python }}'
-  become_user: '{{ django_app_user }}'
-  with_items: '{{ django_app_requirements_files }}'
-  when: '{{ django_app_requirements_type == "requirements.txt" }}'
+  become_user: '{{ django_app__user }}'
+  with_items: '{{ django_app__requirements_files }}'
+  when: '{{ django_app__requirements_type == "requirements.txt" }}'
 
 - name: Run setup.py
   pip:
     name: '.'
-    chdir: '{{ django_app_django_path }}'
+    chdir: '{{ django_app__django_path }}'
     editable: True
-    virtualenv: '{{ django_app_venv_path }}'
-  become_user: '{{ django_app_user }}'
-  when: '{{ django_app_requirements_type == "setup.py" }}'
+    virtualenv: '{{ django_app__venv_path }}'
+  become_user: '{{ django_app__user }}'
+  when: '{{ django_app__requirements_type == "setup.py" }}'
 
 
 - name: Create required directories          
   file:
     path: '{{ item }}'
     state: 'directory'
-    owner: '{{ django_app_user }}'
-    group: '{{ django_app_group }}'
+    owner: '{{ django_app__user }}'
+    group: '{{ django_app__group }}'
     mode: '0755'
   with_items:
-    - '{{ django_app_log_path }}'
-    - '{{ django_app_run_path }}'
-    - '{{ django_app_static_path }}'
-    - '{{ django_app_root_path }}/conf.d'
-    - '{{ django_app_root_path }}/bin'
+    - '{{ django_app__log_path }}'
+    - '{{ django_app__run_path }}'
+    - '{{ django_app__static_path }}'
+    - '{{ django_app__root_path }}/conf.d'
+    - '{{ django_app__root_path }}/bin'
 - name: Install custom systemd unit files
   template:
     src: '{{ item }}.j2'
@@ -70,7 +70,7 @@
 
 - name: Create systemd instance config directory
   file:
-    path: '/etc/systemd/system/gunicorn@{{ django_app_name }}.service.d'
+    path: '/etc/systemd/system/gunicorn@{{ django_app__name }}.service.d'
     state: 'directory'
     owner: 'root'
     group: 'root'
@@ -79,22 +79,22 @@
 - name: Install custom systemd instance config
   template:
     src: 'etc/systemd/system/gunicorn@instance.service.d/instance.conf.j2'
-    dest: '/etc/systemd/system/gunicorn@{{ django_app_name }}.service.d/{{ django_app_name }}.conf'
+    dest: '/etc/systemd/system/gunicorn@{{ django_app__name }}.service.d/{{ django_app__name }}.conf'
     owner: 'root'
     group: 'root'
     mode: '0644'
-  register: django_app_register_install_systemd_instance_config
+  register: django_app__register_install_systemd_instance_config
   notify:
     - 'Reload systemd'
 
 - name: Reload systemd
   command: systemctl daemon-reload
-  when: django_app_register_install_systemd_instance_config.changed
+  when: django_app__register_install_systemd_instance_config.changed
 
 - name: Install gunicorn instance config
   template:
     src: 'app/{{ item }}.j2'
-    dest: '{{ django_app_root_path }}/{{ item }}'
+    dest: '{{ django_app__root_path }}/{{ item }}'
     owner: 'root'
     group: 'root'
     mode: '0644'
@@ -111,7 +111,7 @@
 - name: Install configuration scripts
   template:
     src: 'app/{{ item }}.j2'
-    dest: '{{ django_app_root_path }}/{{ item }}'
+    dest: '{{ django_app__root_path }}/{{ item }}'
     owner: 'root'
     group: 'root'
     mode: '0755'
@@ -120,7 +120,7 @@
 
 - name: Enable systemd service
   service:
-    name: 'gunicorn@{{ django_app_name }}'
+    name: 'gunicorn@{{ django_app__name }}'
     enabled: 'yes'
     state: 'started'
 
@@ -129,41 +129,41 @@
 # Collecting static files
 
 - name: Run migrations
-  shell: '. {{ django_app_root_path }}/bin/setup_django_env.sh; python -m {{ django_app__manage_module }} migrate --noinput'
+  shell: '. {{ django_app__root_path }}/bin/setup_django_env.sh; python -m {{ django_app__manage_module }} migrate --noinput'
   args:
-    chdir: '{{ django_app_django_path }}'
-  become_user: '{{ django_app_user }}'
-  register: django_app_register_migrate
-  changed_when: not django_app_register_migrate.stdout_lines[-1]|match("^  No migrations to apply.*")|bool
+    chdir: '{{ django_app__django_path }}'
+  become_user: '{{ django_app__user }}'
+  register: django_app__register_migrate
+  changed_when: not django_app__register_migrate.stdout_lines[-1]|match("^  No migrations to apply.*")|bool
   notify:
     - 'Restart gunicorn service'
   tags: [ 'role::django_app:migrate' ]
 
 - name: Create super users
-  shell: ". {{ django_app_root_path }}/bin/setup_django_env.sh; echo \"from django.contrib.auth.models import User; 'ok' if User.objects.filter(username__exact='{{ item.key }}').exists() else User.objects.create_superuser('{{ item.key }}', '{{ item.value }}', '{{ lookup('password', secret + '/credentials/' + ansible_fqdn + '/django_app/' + django_app_name + '/users/' + item.key +' length=12 chars=ascii_letters,digits') }}')\" | python -m {{ django_app__manage_module }} shell"
+  shell: ". {{ django_app__root_path }}/bin/setup_django_env.sh; echo \"from django.contrib.auth.models import User; 'ok' if User.objects.filter(username__exact='{{ item.key }}').exists() else User.objects.create_superuser('{{ item.key }}', '{{ item.value }}', '{{ lookup('password', secret + '/credentials/' + ansible_fqdn + '/django_app/' + django_app__name + '/users/' + item.key +' length=12 chars=ascii_letters,digits') }}')\" | python -m {{ django_app__manage_module }} shell"
   args:
-    chdir: '{{ django_app_django_path }}'
-  become_user: '{{ django_app_user }}'
+    chdir: '{{ django_app__django_path }}'
+  become_user: '{{ django_app__user }}'
   no_log: True
-  with_dict: '{{ django_app_admin_users }}'
-  register: django_app_register_create_super_users
-  changed_when: "{{ not django_app_register_create_super_users.stdout_lines[0]|match(\">>> 'ok'\")|bool }}"
+  with_dict: '{{ django_app__admin_users }}'
+  register: django_app__register_create_super_users
+  changed_when: "{{ not django_app__register_create_super_users.stdout_lines[0]|match(\">>> 'ok'\")|bool }}"
   tags: [ 'role::django_app:superusers' ]
 
 - name: Compile messages
-  shell: '. {{ django_app_root_path }}/bin/setup_django_env.sh; python -m {{ django_app__manage_module }} compilemessages'
+  shell: '. {{ django_app__root_path }}/bin/setup_django_env.sh; python -m {{ django_app__manage_module }} compilemessages'
   args:
-    chdir: '{{ django_app_django_path }}'
-  become_user: '{{ django_app_user }}'
+    chdir: '{{ django_app__django_path }}'
+  become_user: '{{ django_app__user }}'
   notify:
     - 'Restart gunicorn service'
   tags: [ 'role::django_app:gettext' ]
-  when: '{{ django_app_enable_gettext }}'
+  when: '{{ django_app__enable_gettext }}'
 
-# Zrestartować gunicorna gdy: git_checkout__register_status[django_app_name]['changed']
+# Zrestartować gunicorna gdy: git_checkout__register_status[django_app__name]['changed']
 
 - name: Restart gunicorn when app was updated
   service:
-    name: 'gunicorn@{{ django_app_name }}'
+    name: 'gunicorn@{{ django_app__name }}'
     state: 'restarted'
-  when: git_checkout__register_status[django_app_name]['changed']
+  when: git_checkout__register_status[django_app__name]['changed']
