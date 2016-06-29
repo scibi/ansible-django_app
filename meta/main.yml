@@ -5,13 +5,13 @@ dependencies:
 
   - role: debops.git_checkout
     tags: [ 'depend::git_checkout', 'depend::git_checkout:django_app', 'depend-of::django_app', 'type::dependency' ]
-    git_checkout_name: '{{ django_app_name }}'
-    git_checkout_app_path: '{{ django_app_app_path }}'
-    git_checkout_app_home_path: '{{ django_app_root_path }}'
-    git_checkout_src_path: '{{ django_app_src_path }}'
-    git_checkout_version: '{{ django_app_version }}'
-    git_checkout_user: '{{ django_app_user }}'
-    git_checkout_group: '{{ django_app_group }}'
+    git_checkout__name: '{{ django_app_name }}'
+    git_checkout__app_path: '{{ django_app_app_path }}'
+    git_checkout__app_home_path: '{{ django_app_root_path }}'
+    git_checkout__src_path: '{{ django_app_src_path }}'
+    git_checkout__version: '{{ django_app_version }}'
+    git_checkout__user: '{{ django_app_user }}'
+    git_checkout__group: '{{ django_app_group }}'
 
   - role: debops.nginx
     tags: [ 'depend::nginx', 'depend::nginx:django_app', 'depend-of::django_app', 'type::dependency' ]

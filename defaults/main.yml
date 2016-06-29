@@ -6,7 +6,7 @@
 #    :local:
 #
 
-django_app_name: False
+#django_app_name: False
 django_app_version: 'master'        
 django_app_user: '{{ django_app_name }}'
 django_app_group: '{{ django_app_user }}'
@@ -26,6 +26,7 @@ django_app_secret_key: "{{ lookup('password', secret + '/credentials/' + ansible
 django_app_environment:
   DJANGO_CONFIGURATION: 'Production'
   DJANGO_STATIC_ROOT: '{{ django_app_static_path }}'
+  DJANGO_ALLOWED_HOSTS: '{{ ansible_fqdn }}'
 django_app_environment_venv:
   VIRTUAL_ENV: '{{ django_app_venv_path }}'
   PATH: '{{ django_app_venv_path }}/bin:$PATH'
@@ -37,7 +38,6 @@ django_app_packages_base:
   - 'virtualenv'
   - 'python-pip'
   - 'build-essential'
-  - 'python-dev'
 django_app_packages: []
 django_app_packages_postgresql:
   True: 
@@ -54,6 +54,11 @@ django_app_packages_gettext:
   True: 
     - 'gettext'
   False: []
+django_app_packages_python27:
+  True:
+    - 'python-dev'
+  False:
+    - 'python3-dev'
 
 django_app_nginx_upstreams:        
   - enabled: True
@@ -115,6 +120,13 @@ django_app_database_password_path: "{{ secret + '/' + django_app_database + '/' 
 # Database password for the app.
 django_app_database_password: "{{ lookup('password', django_app_database_password_path + ' length=48') }}"
 
-django_app_requirements_path: 'requirements.txt'
+# Possible values:
+#  - requirements.txt
+#  - setup.py
+django_app_requirements_type: 'requirements.txt'
+django_app_requirements_files: [ 'requirements.txt' ]
+django_app_requirements_install: True
 django_app_wsgi_module: 'wsgi'
 
+django_app__manage_module: 'manage'
+django_app__python: 'python2.7'        

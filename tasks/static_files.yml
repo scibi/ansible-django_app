@@ -28,7 +28,7 @@
 # Collecting static files
 
 - name: Collect static
-  shell: '. {{ django_app_root_path }}/bin/setup_django_env.sh; ./manage.py collectstatic --noinput --link'
+  shell: '. {{ django_app_root_path }}/bin/setup_django_env.sh; python -m {{ django_app__manage_module }} collectstatic --noinput --link'
   args:
     chdir: '{{ django_app_django_path }}'
   sudo_user: '{{ django_app_user }}'
